@@ -1,0 +1,185 @@
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #f4f6f8;
+    color: #252525;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+}
+
+.container {
+    width: 100%;
+    max-width: 480px;
+    padding: 35px 25px;
+}
+
+/* Cabeçalho */
+
+header {
+    text-align: center;
+    margin-bottom: 45px;
+}
+
+header h1 {
+    font-size: 24px;
+    margin-bottom: 8px;
+}
+
+header p {
+    color: #777;
+    font-size: 14px;
+}
+
+/* Contagem de pessoas */
+
+.contagem {
+    text-align: center;
+    margin-bottom: 35px;
+}
+
+.numero {
+    display: block;
+    font-size: 110px;
+    font-weight: bold;
+    color: #2563eb;
+}
+
+.contagem p {
+    font-size: 17px;
+    color: #666;
+}
+
+/* Presença */
+
+.presenca {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 18px;
+    margin-bottom: 25px;
+    font-size: 17px;
+    font-weight: bold;
+}
+
+.indicador {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: #16a34a;
+}
+
+.estado-nao {
+    display: none;
+}
+
+/* Estado vazio */
+
+body[data-presenca="nao"] .indicador {
+    background-color: #999;
+}
+
+body[data-presenca="nao"] .estado-sim {
+    display: none;
+}
+
+body[data-presenca="nao"] .estado-nao {
+    display: inline;
+}
+
+/* Movimentação */
+
+.movimento {
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 22px;
+    text-align: center;
+}
+
+.movimento h2 {
+    font-size: 18px;
+    margin-bottom: 25px;
+}
+
+.direcao {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: #777;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+.seta {
+    font-size: 30px;
+    color: #2563eb;
+}
+
+body[data-fluxo="saindo"] .seta {
+    transform: rotate(180deg);
+    color: #dc2626;
+}
+
+body[data-fluxo="parado"] .seta {
+    opacity: 0.3;
+}
+
+.fluxo {
+    display: none;
+    font-size: 15px;
+    font-weight: bold;
+}
+
+.fluxo-entrando {
+    color: #2563eb;
+}
+
+.fluxo-saindo {
+    color: #dc2626;
+}
+
+.fluxo-parado {
+    color: #777;
+}
+
+body[data-fluxo="entrando"] .fluxo-entrando,
+body[data-fluxo="saindo"] .fluxo-saindo,
+body[data-fluxo="parado"] .fluxo-parado {
+    display: block;
+}
+
+/* Rodapé */
+
+footer {
+    text-align: center;
+    margin-top: 35px;
+    color: #999;
+    font-size: 12px;
+}
+
+/* Responsividade */
+
+@media (max-width: 400px) {
+    .container {
+        padding: 25px 18px;
+    }
+
+    header h1 {
+        font-size: 21px;
+    }
+
+    .numero {
+        font-size: 90px;
+    }
+}
