@@ -1,0 +1,432 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#101827">
+    <title>RoomSense | Monitoramento de ambiente</title>
+    <link rel="stylesheet" href="index.css">
+    <script src="index.js" defer></script>
+</head>
+<body>
+    <div class="app-shell">
+
+        <aside class="sidebar">
+            <a class="brand" href="#" aria-label="RoomSense início">
+                <span class="brand-mark"><span></span><span></span><span></span></span>
+                <span>Room<span class="brand-light">Sense</span></span>
+            </a>
+
+            <div class="side-label">MONITORAMENTO</div>
+
+            <nav class="side-nav" aria-label="Navegação principal">
+                <a class="nav-item active" href="#visao-geral">
+                    <span class="nav-icon">▦</span> Visão geral
+                </a>
+                <a class="nav-item" href="#sensores">
+                    <span class="nav-icon">⌁</span> Sensores
+                </a>
+                <a class="nav-item" href="#atuadores">
+                    <span class="nav-icon">◉</span> Atuadores
+                </a>
+                <a class="nav-item" href="#logs">
+                    <span class="nav-icon">≡</span> Logs do sistema
+                </a>
+            </nav>
+
+            <div class="sidebar-bottom">
+                <div class="device-mini">
+                    <div class="device-mini-icon">ESP</div>
+                    <div class="device-mini-text">
+                        <strong>ESP32</strong>
+                        <span id="sidebar-device-status">Aguardando conexão</span>
+                    </div>
+                    <span class="status-dot offline" id="sidebar-status-dot"></span>
+                </div>
+                <p class="sidebar-footnote">Projeto acadêmico · Sistemas Ciberfísicos</p>
+            </div>
+        </aside>
+
+        <main class="main-content" id="visao-geral">
+
+            <header class="topbar">
+                <div>
+                    <div class="eyebrow">SISTEMA DE MONITORAMENTO</div>
+                    <h1>Visão geral</h1>
+                    <p class="page-subtitle">
+                        Acompanhe a ocupação e o estado dos dispositivos em tempo real.
+                    </p>
+                </div>
+
+                <div class="topbar-right">
+                    <div class="connection-pill" id="connection-pill" aria-live="polite">
+                        <span class="status-dot offline" id="connection-dot"></span>
+                        <span id="connection-text">ESP32 desconectado</span>
+                    </div>
+
+                    <div class="clock-block">
+                        <strong id="current-time">--:--:--</strong>
+                        <span id="current-date">Carregando data</span>
+                    </div>
+                </div>
+            </header>
+
+            <section class="demo-notice" aria-label="Status do sistema">
+                <span class="demo-icon">i</span>
+                <div>
+                    <strong>Monitoramento em tempo real</strong>
+                    <p>
+                        Os dados dos sensores e os comandos dos atuadores são obtidos
+                        diretamente do ESP32 pela rede local.
+                    </p>
+                </div>
+                <span class="demo-tag">ESP32</span>
+            </section>
+
+            <section class="section-block">
+                <div class="section-heading">
+                    <div>
+                        <h2>Resumo do ambiente</h2>
+                        <p>Indicadores principais da ocupação.</p>
+                    </div>
+
+                    <span class="updated-label" id="updated-label">
+                        <span class="pulse-dot"></span> Aguardando conexão
+                    </span>
+                </div>
+
+                <div class="overview-grid">
+
+                    <article class="metric-card occupancy-card">
+                        <div class="metric-top">
+                            <span class="metric-label">Pessoas no ambiente</span>
+                            <span class="metric-icon blue">♙</span>
+                        </div>
+
+                        <div class="metric-value-line">
+                            <strong class="metric-value" id="occupancy-value">0</strong>
+                            <span class="metric-unit">pessoas</span>
+                        </div>
+
+                        <div class="capacity-line">
+                            <span>Capacidade utilizada</span>
+                            <strong id="capacity-percent">0%</strong>
+                        </div>
+
+                        <div class="progress-track">
+                            <div class="progress-fill" id="occupancy-progress" style="width:0%"></div>
+                        </div>
+
+                        <div class="metric-foot">
+                            <span id="available-spaces">10 vagas disponíveis</span>
+                            <span>Limite: <b id="capacity-label">10</b></span>
+                        </div>
+                    </article>
+
+                    <article class="metric-card">
+                        <div class="metric-top">
+                            <span class="metric-label">Situação do ambiente</span>
+                            <span class="metric-icon green">⌂</span>
+                        </div>
+
+                        <div class="state-line">
+                            <span class="large-state-dot empty" id="room-state-dot"></span>
+                            <strong id="room-state">Vazio</strong>
+                        </div>
+
+                        <p class="metric-description" id="room-description">
+                            Nenhuma pessoa detectada no ambiente.
+                        </p>
+
+                        <div class="card-bottom-note">
+                            <span class="tiny-check">✓</span> Monitoramento de presença
+                        </div>
+                    </article>
+
+                    <article class="metric-card">
+                        <div class="metric-top">
+                            <span class="metric-label">Movimentação recente</span>
+                            <span class="metric-icon violet">⇄</span>
+                        </div>
+
+                        <div class="movement-state" id="movement-state">Sem movimentação</div>
+
+                        <p class="metric-description" id="movement-description">
+                            Aguardando acionamento dos sensores.
+                        </p>
+
+                        <div class="movement-counts">
+                            <span><b class="entry-text" id="entries-total">0</b> entradas</span>
+                            <span><b class="exit-text" id="exits-total">0</b> saídas</span>
+                        </div>
+                    </article>
+
+                    <article class="metric-card">
+                        <div class="metric-top">
+                            <span class="metric-label">Estado do dispositivo</span>
+                            <span class="metric-icon amber">⌘</span>
+                        </div>
+
+                        <div class="device-state">
+                            <span class="status-dot offline" id="device-state-dot"></span>
+                            <strong id="device-state-text">Desconectado</strong>
+                        </div>
+
+                        <p class="metric-description">
+                            Estado da comunicação com o servidor embarcado.
+                        </p>
+
+                        <div class="card-bottom-note">
+                            <span class="device-code">ESP32</span> Servidor HTTP na rede local
+                        </div>
+                    </article>
+
+                </div>
+            </section>
+
+            <div class="content-grid">
+
+                <section class="panel sensors-panel" id="sensores">
+                    <div class="panel-heading">
+                        <div>
+                            <h2>Sensores infravermelhos</h2>
+                            <p>Monitoramento dos pontos de passagem.</p>
+                        </div>
+                        <span class="neutral-chip">2 dispositivos</span>
+                    </div>
+
+                    <div class="sensor-list">
+
+                        <div class="sensor-row">
+                            <div class="sensor-symbol">IR</div>
+
+                            <div class="sensor-info">
+                                <strong>Sensor de entrada</strong>
+                                <span>GPIO 27 · FC-51</span>
+                            </div>
+
+                            <div class="sensor-status">
+                                <span class="sensor-indicator" id="entry-sensor-indicator"></span>
+                                <strong id="entry-sensor-status">Livre</strong>
+                            </div>
+                        </div>
+
+                        <div class="sensor-row">
+                            <div class="sensor-symbol">IR</div>
+
+                            <div class="sensor-info">
+                                <strong>Sensor de saída</strong>
+                                <span>GPIO 26 · FC-51</span>
+                            </div>
+
+                            <div class="sensor-status">
+                                <span class="sensor-indicator" id="exit-sensor-indicator"></span>
+                                <strong id="exit-sensor-status">Livre</strong>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="sensor-legend">
+                        <span><i class="legend-dot idle"></i> Sem detecção</span>
+                        <span><i class="legend-dot detecting"></i> Objeto detectado</span>
+                    </div>
+                </section>
+
+                <section class="panel flow-panel">
+                    <div class="panel-heading">
+                        <div>
+                            <h2>Fluxo de passagem</h2>
+                            <p>Direção identificada pelo par de sensores.</p>
+                        </div>
+                        <span class="live-label">
+                            <span class="pulse-dot"></span> AO VIVO
+                        </span>
+                    </div>
+
+                    <div class="flow-visual">
+                        <div class="flow-point">
+                            <span class="flow-point-icon">↗</span>
+                            <strong>Fora</strong>
+                        </div>
+
+                        <div class="flow-track">
+                            <div class="flow-line"></div>
+                            <span class="flow-arrow" id="flow-arrow">➜</span>
+                        </div>
+
+                        <div class="flow-point">
+                            <span class="flow-point-icon">⌂</span>
+                            <strong>Dentro</strong>
+                        </div>
+                    </div>
+
+                    <div class="flow-result" id="flow-result">
+                        <span class="flow-result-dot"></span>
+                        <strong>Sem movimentação</strong>
+                    </div>
+
+                    <p class="flow-footnote">
+                        Direção identificada pelos sensores físicos do ESP32.
+                    </p>
+                </section>
+
+            </div>
+
+            <div class="content-grid lower-grid">
+
+                <section class="panel actuators-panel" id="atuadores">
+                    <div class="panel-heading">
+                        <div>
+                            <h2>Atuadores</h2>
+                            <p>Indicadores luminosos conectados ao ESP32.</p>
+                        </div>
+                        <span class="neutral-chip">GPIO 18 · GPIO 19</span>
+                    </div>
+
+                    <div class="actuator-list">
+
+                        <div class="actuator-row">
+                            <div class="led-preview red-led" id="red-led-preview">
+                                <span></span>
+                            </div>
+
+                            <div class="actuator-info">
+                                <strong>LED vermelho</strong>
+                                <span>GPIO 18 · Alerta / lotação</span>
+                            </div>
+
+                            <button
+                                class="toggle-switch"
+                                id="red-led-toggle"
+                                type="button"
+                                role="switch"
+                                aria-checked="false"
+                                aria-label="Alternar LED vermelho">
+                                <span></span>
+                            </button>
+
+                            <span class="actuator-state" id="red-led-state">Desligado</span>
+                        </div>
+
+                        <div class="actuator-row">
+                            <div class="led-preview green-led" id="green-led-preview">
+                                <span></span>
+                            </div>
+
+                            <div class="actuator-info">
+                                <strong>LED verde</strong>
+                                <span>GPIO 19 · Vagas disponíveis</span>
+                            </div>
+
+                            <button
+                                class="toggle-switch is-on"
+                                id="green-led-toggle"
+                                type="button"
+                                role="switch"
+                                aria-checked="true"
+                                aria-label="Alternar LED verde">
+                                <span></span>
+                            </button>
+
+                            <span class="actuator-state" id="green-led-state">Ligado</span>
+                        </div>
+
+                    </div>
+
+                    <div class="actuator-footer">
+                        <span>Modo de controle</span>
+
+                        <div class="mode-control">
+                            <button class="mode-button active" id="auto-mode" type="button">
+                                Automático
+                            </button>
+                            <button class="mode-button" id="manual-mode" type="button">
+                                Manual
+                            </button>
+                        </div>
+                    </div>
+
+                    <p class="actuator-hint" id="actuator-hint">
+                        Aguardando comunicação com o ESP32.
+                    </p>
+                </section>
+
+                <section class="panel simulator-panel">
+                    <div class="panel-heading">
+                        <div>
+                            <h2>Eventos dos sensores</h2>
+                            <p>Entradas e saídas registradas pelos sensores físicos.</p>
+                        </div>
+                        <span class="demo-tag">ESP32</span>
+                    </div>
+
+                    <div class="simulator-actions">
+                        <button class="action-button primary-action" id="simulate-entry" type="button">
+                            <span>＋</span> Entrada física
+                        </button>
+
+                        <button class="action-button secondary-action" id="simulate-exit" type="button">
+                            <span>−</span> Saída física
+                        </button>
+                    </div>
+
+                    <div class="simulator-bottom">
+                        <button class="text-button" id="reset-demo" type="button">
+                            ↺ Zerar contador físico
+                        </button>
+                        <span>Limite de ocupação: <b>0 a 10</b></span>
+                    </div>
+
+                    <p class="simulator-warning" id="simulator-feedback" aria-live="polite">
+                        Aguardando eventos dos sensores físicos do ESP32.
+                    </p>
+                </section>
+
+            </div>
+
+            <section class="panel logs-panel" id="logs">
+                <div class="panel-heading logs-heading">
+                    <div>
+                        <h2>Log do sistema</h2>
+                        <p>Registro de eventos e mensagens recebidas do firmware.</p>
+                    </div>
+
+                    <div class="log-actions">
+                        <span class="log-count" id="log-count">0 eventos</span>
+                        <button class="clear-logs" id="clear-logs" type="button">
+                            Limpar logs
+                        </button>
+                    </div>
+                </div>
+
+                <div class="log-terminal" role="log" aria-live="polite" aria-relevant="additions">
+                    <div class="terminal-topbar">
+                        <div class="terminal-lights">
+                            <i></i><i></i><i></i>
+                        </div>
+                        <span>ESP32_SERIAL_MONITOR</span>
+                        <span class="terminal-baud">115200 baud</span>
+                    </div>
+
+                    <div class="log-list" id="log-list">
+                        <div class="log-empty">Aguardando eventos do sistema...</div>
+                    </div>
+                </div>
+
+                <div class="logs-footer">
+                    <span><i class="legend-dot detecting"></i> Eventos registrados pelo sistema</span>
+                    <span>Informações recebidas diretamente do servidor ESP32.</span>
+                </div>
+            </section>
+
+            <footer class="main-footer">
+                <span>RoomSense <b>•</b> Projeto de Sistemas Ciberfísicos</span>
+                <span>Interface conectada ao ESP32 · <span id="footer-year"></span></span>
+            </footer>
+
+        </main>
+    </div>
+</body>
+</html>
