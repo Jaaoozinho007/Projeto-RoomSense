@@ -1,4 +1,4 @@
-# Projeto Smart Room
+# Projeto Room Sense
 
 Sistema de **contagem de pessoas e alerta de disponibilidade de salas**, usando um **ESP32 como servidor**. Dois sensores infravermelhos na porta identificam se alguém entrou ou saiu; o ESP32 mantém a ocupação, mostra o estado em um display OLED e em LEDs, e disponibiliza os dados para um cliente web.
 
