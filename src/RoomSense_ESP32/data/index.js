@@ -1,3 +1,4 @@
+
 // RoomSense - Dashboard conectado ao ESP32
 // O navegador atua como cliente; o ESP32 hospeda a página e a API.
 "use strict";
@@ -52,6 +53,8 @@ const elements = {
     exits: $("exits-total"),
     flowArrow: $("flow-arrow"),
     flowResult: $("flow-result"),
+    simulateEntry: $("simulate-entry"),
+    simulateExit: $("simulate-exit"),
 
     // Sensores
     entrySensorIndicator: $("entry-sensor-indicator"),
@@ -87,7 +90,11 @@ function checkElements() {
         .map(([name]) => name);
 
     if (missing.length > 0) {
-        console.error("RoomSense: elementos HTML não encontrados:", missing);
+        console.error(
+            "RoomSense: elementos HTML não encontrados:",
+            missing
+        );
+
         return false;
     }
 
@@ -102,9 +109,14 @@ function setConnection(connected) {
 
     const statusClass = connected ? "online" : "offline";
 
-    elements.connectionDot.className = `status-dot ${statusClass}`;
-    elements.deviceDot.className = `status-dot ${statusClass}`;
-    elements.sidebarDot.className = `status-dot ${statusClass}`;
+    elements.connectionDot.className =
+        `status-dot ${statusClass}`;
+
+    elements.deviceDot.className =
+        `status-dot ${statusClass}`;
+
+    elements.sidebarDot.className =
+        `status-dot ${statusClass}`;
 
     elements.connectionText.textContent =
         connected ? "ESP32 conectado" : "ESP32 desconectado";
@@ -115,11 +127,16 @@ function setConnection(connected) {
     elements.sidebarStatus.textContent =
         connected ? "Conectado à rede" : "Aguardando conexão";
 
-    elements.connectionPill.classList.toggle("connected", connected);
+    elements.connectionPill.classList.toggle(
+        "connected",
+        connected
+    );
 
     elements.updatedLabel.innerHTML =
         `<span class="pulse-dot"></span> ${
-            connected ? "Atualização em tempo real" : "Sem atualização"
+            connected
+                ? "Atualização em tempo real"
+                : "Sem atualização"
         }`;
 
     if (changed) {
@@ -132,7 +149,7 @@ function setConnection(connected) {
     }
 }
 
-// Registra eventos
+// Registra eventos locais
 function addLog(level, message, time = getTime()) {
     const key = `${time}|${level}|${message}`;
 
@@ -159,76 +176,121 @@ function renderLogs() {
 
     if (!state.logs.length) {
         const empty = document.createElement("div");
+
         empty.className = "log-empty";
-        empty.textContent = "Aguardando eventos do sistema...";
+
+        empty.textContent =
+            "Aguardando eventos do sistema...";
 
         elements.logList.appendChild(empty);
+
     } else {
         state.logs.forEach(entry => {
             const row = document.createElement("div");
+
             row.className = "log-entry";
 
             const time = document.createElement("span");
+
             time.className = "log-time";
+
             time.textContent = `[${entry.time}]`;
 
             const level = document.createElement("span");
-            level.className = `log-level ${entry.level}`;
-            level.textContent = entry.level.toUpperCase();
+
+            level.className =
+                `log-level ${entry.level}`;
+
+            level.textContent =
+                entry.level.toUpperCase();
 
             const message = document.createElement("span");
+
             message.className = "log-message";
+
             message.textContent = entry.message;
 
             row.append(time, level, message);
+
             elements.logList.appendChild(row);
         });
     }
 
     elements.logCount.textContent =
         `${state.logs.length} ${
-            state.logs.length === 1 ? "evento" : "eventos"
+            state.logs.length === 1
+                ? "evento"
+                : "eventos"
         }`;
 }
 
 // Atualiza os dados de ocupação
 function updateOccupancy() {
     const percent = state.capacity > 0
-        ? Math.round(state.occupancy / state.capacity * 100)
+        ? Math.round(
+            state.occupancy / state.capacity * 100
+        )
         : 0;
 
-    const available = Math.max(0, state.capacity - state.occupancy);
+    const available = Math.max(
+        0,
+        state.capacity - state.occupancy
+    );
 
-    elements.occupancy.textContent = state.occupancy;
-    elements.capacityPercent.textContent = `${percent}%`;
-    elements.progress.style.width = `${percent}%`;
+    elements.occupancy.textContent =
+        state.occupancy;
+
+    elements.capacityPercent.textContent =
+        `${percent}%`;
+
+    elements.progress.style.width =
+        `${percent}%`;
 
     elements.available.textContent =
-        `${available} ${available === 1 ? "vaga disponível" : "vagas disponíveis"}`;
+        `${available} ${
+            available === 1
+                ? "vaga disponível"
+                : "vagas disponíveis"
+        }`;
 
-    elements.capacityLabel.textContent = state.capacity;
+    elements.capacityLabel.textContent =
+        state.capacity;
 
     if (state.occupancy === 0) {
         elements.roomState.textContent = "Vazio";
-        elements.roomDot.className = "large-state-dot empty";
+
+        elements.roomDot.className =
+            "large-state-dot empty";
+
         elements.roomDescription.textContent =
             "Nenhuma pessoa detectada no ambiente.";
 
-    } else if (state.occupancy >= state.capacity) {
+    } else if (
+        state.occupancy >= state.capacity
+    ) {
         elements.roomState.textContent = "Lotado";
-        elements.roomDot.className = "large-state-dot full";
+
+        elements.roomDot.className =
+            "large-state-dot full";
+
         elements.roomDescription.textContent =
             "A capacidade máxima do ambiente foi atingida.";
 
     } else {
         elements.roomState.textContent = "Ocupado";
-        elements.roomDot.className = "large-state-dot occupied";
+
+        elements.roomDot.className =
+            "large-state-dot occupied";
+
         elements.roomDescription.textContent =
             "Há pessoas presentes no ambiente.";
     }
 
-    elements.entries.textContent = state.entries;
-    elements.exits.textContent = state.exits;
+    elements.entries.textContent =
+        state.entries;
+
+    elements.exits.textContent =
+        state.exits;
 }
 
 // Atualiza a movimentação
@@ -240,47 +302,67 @@ function updateMovement(direction) {
             "Entrada detectada",
             "Sequência: sensor de entrada → sensor de saída."
         ],
+
         saindo: [
             "Saída detectada",
             "Sequência: sensor de saída → sensor de entrada."
         ],
+
         parado: [
             "Sem movimentação",
             "Aguardando acionamento dos sensores."
         ]
     };
 
-    const current = labels[direction] || labels.parado;
+    const current =
+        labels[direction] || labels.parado;
 
-    elements.movement.textContent = current[0];
-    elements.movementDescription.textContent = current[1];
+    elements.movement.textContent =
+        current[0];
 
-    elements.flowArrow.className = "flow-arrow";
-    elements.flowResult.className = "flow-result";
+    elements.movementDescription.textContent =
+        current[1];
 
-    const resultText = elements.flowResult.querySelector("strong");
+    elements.flowArrow.className =
+        "flow-arrow";
 
-    if (direction === "entrando" || direction === "saindo") {
+    elements.flowResult.className =
+        "flow-result";
+
+    const resultText =
+        elements.flowResult.querySelector("strong");
+
+    if (
+        direction === "entrando" ||
+        direction === "saindo"
+    ) {
         elements.flowArrow.classList.add(
-            direction === "entrando" ? "entering" : "exiting"
+            direction === "entrando"
+                ? "entering"
+                : "exiting"
         );
 
         elements.flowResult.classList.add(
-            direction === "entrando" ? "entering" : "exiting"
+            direction === "entrando"
+                ? "entering"
+                : "exiting"
         );
 
         resultText.textContent =
             direction === "entrando"
                 ? "Pessoa entrando"
                 : "Pessoa saindo";
+
     } else {
-        resultText.textContent = "Sem movimentação";
+        resultText.textContent =
+            "Sem movimentação";
     }
 }
 
 // Atualiza os indicadores dos sensores
 function setSensorActivity(sensor, active) {
-    const isEntry = sensor === "entrada";
+    const isEntry =
+        sensor === "entrada";
 
     const indicator = isEntry
         ? elements.entrySensorIndicator
@@ -290,8 +372,13 @@ function setSensorActivity(sensor, active) {
         ? elements.entrySensorStatus
         : elements.exitSensorStatus;
 
-    indicator.classList.toggle("active", active);
-    label.textContent = active ? "Detectando" : "Livre";
+    indicator.classList.toggle(
+        "active",
+        active
+    );
+
+    label.textContent =
+        active ? "Detectando" : "Livre";
 }
 
 // Atualiza os LEDs
@@ -303,6 +390,7 @@ function renderActuators() {
             elements.redToggle,
             elements.redState
         ],
+
         [
             state.ledGreen,
             elements.greenPreview,
@@ -311,23 +399,52 @@ function renderActuators() {
         ]
     ];
 
-    for (const [on, preview, toggle, label] of leds) {
-        preview.classList.toggle("is-on", on);
-        toggle.classList.toggle("is-on", on);
+    for (
+        const [on, preview, toggle, label]
+        of leds
+    ) {
+        preview.classList.toggle(
+            "is-on",
+            on
+        );
 
-        toggle.setAttribute("aria-checked", String(on));
+        toggle.classList.toggle(
+            "is-on",
+            on
+        );
 
-        label.textContent = on ? "Ligado" : "Desligado";
-        label.classList.toggle("on", on);
+        toggle.setAttribute(
+            "aria-checked",
+            String(on)
+        );
+
+        label.textContent =
+            on ? "Ligado" : "Desligado";
+
+        label.classList.toggle(
+            "on",
+            on
+        );
     }
 
-    const manual = state.actuatorMode === "manual";
+    const manual =
+        state.actuatorMode === "manual";
 
-    elements.redToggle.disabled = !manual || !state.connected;
-    elements.greenToggle.disabled = !manual || !state.connected;
+    elements.redToggle.disabled =
+        !manual || !state.connected;
 
-    $("auto-mode").classList.toggle("active", !manual);
-    $("manual-mode").classList.toggle("active", manual);
+    elements.greenToggle.disabled =
+        !manual || !state.connected;
+
+    $("auto-mode").classList.toggle(
+        "active",
+        !manual
+    );
+
+    $("manual-mode").classList.toggle(
+        "active",
+        manual
+    );
 
     elements.actuatorHint.textContent = manual
         ? "Modo manual: os interruptores enviam comandos aos LEDs físicos do ESP32."
@@ -336,22 +453,31 @@ function renderActuators() {
 
 // Comunicação com a API do ESP32
 async function api(path, options = {}) {
-    const response = await fetch(`${API}${path}`, {
-        ...options,
-        cache: "no-store"
-    });
+    const response = await fetch(
+        `${API}${path}`,
+        {
+            ...options,
+            cache: "no-store"
+        }
+    );
 
     if (!response.ok) {
         let detail = "";
 
         try {
-            detail = (await response.json()).error || "";
+            detail = (
+                await response.json()
+            ).error || "";
+
         } catch (_) {}
 
-        throw new Error(detail || `HTTP ${response.status}`);
+        throw new Error(
+            detail || `HTTP ${response.status}`
+        );
     }
 
-    const type = response.headers.get("content-type") || "";
+    const type =
+        response.headers.get("content-type") || "";
 
     return type.includes("application/json")
         ? response.json()
@@ -360,38 +486,67 @@ async function api(path, options = {}) {
 
 // Envia comandos no formato de formulário
 function postForm(path, values) {
-    return api(path, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/x-www-form-urlencoded"
-        },
-        body: new URLSearchParams(values)
-    });
+    return api(
+        path,
+        {
+            method: "POST",
+
+            headers: {
+                "Content-Type":
+                    "application/x-www-form-urlencoded"
+            },
+
+            body: new URLSearchParams(values)
+        }
+    );
 }
 
 // Recebe e aplica os dados do ESP32
 function applyStatus(data) {
-    state.occupancy = Number(data.occupancy ?? 0);
-    state.capacity = Number(data.capacity ?? 10);
-    state.entries = Number(data.entries ?? 0);
-    state.exits = Number(data.exits ?? 0);
+    state.occupancy =
+        Number(data.occupancy ?? 0);
 
-    state.ledRed = Boolean(data.ledRed);
-    state.ledGreen = Boolean(data.ledGreen);
-    state.actuatorMode = data.mode || "auto";
+    state.capacity =
+        Number(data.capacity ?? 10);
+
+    state.entries =
+        Number(data.entries ?? 0);
+
+    state.exits =
+        Number(data.exits ?? 0);
+
+    state.ledRed =
+        Boolean(data.ledRed);
+
+    state.ledGreen =
+        Boolean(data.ledGreen);
+
+    state.actuatorMode =
+        data.mode || "auto";
 
     updateOccupancy();
-    updateMovement(data.movement || "parado");
 
-    setSensorActivity("entrada", Boolean(data.entryDetected));
-    setSensorActivity("saida", Boolean(data.exitDetected));
+    updateMovement(
+        data.movement || "parado"
+    );
+
+    setSensorActivity(
+        "entrada",
+        Boolean(data.entryDetected)
+    );
+
+    setSensorActivity(
+        "saida",
+        Boolean(data.exitDetected)
+    );
 
     renderActuators();
 }
 
 // Atualiza os logs recebidos do ESP32
 async function refreshLogs() {
-    const data = await api("/api/logs");
+    const data =
+        await api("/api/logs");
 
     if (Array.isArray(data.logs)) {
         state.logs = data.logs
@@ -404,6 +559,7 @@ async function refreshLogs() {
             }));
 
         state.lastLogSignature = "";
+
         renderLogs();
     }
 }
@@ -411,20 +567,30 @@ async function refreshLogs() {
 // Consulta o servidor periodicamente
 async function pollESP32() {
     try {
-        const data = await api("/api/status");
+        const data =
+            await api("/api/status");
 
         setConnection(true);
+
         applyStatus(data);
 
         try {
             await refreshLogs();
+
         } catch (error) {
-            console.warn("Falha ao atualizar logs:", error);
+            console.warn(
+                "Falha ao atualizar logs:",
+                error
+            );
         }
 
     } catch (error) {
         setConnection(false);
-        console.warn("RoomSense API:", error);
+
+        console.warn(
+            "RoomSense API:",
+            error
+        );
     }
 }
 
@@ -433,11 +599,15 @@ async function command(action, successMessage) {
     try {
         const data = await action();
 
-        if (data && data.occupancy !== undefined) {
+        if (
+            data &&
+            data.occupancy !== undefined
+        ) {
             applyStatus(data);
         }
 
-        elements.feedback.textContent = successMessage;
+        elements.feedback.textContent =
+            successMessage;
 
         await pollESP32();
 
@@ -445,7 +615,10 @@ async function command(action, successMessage) {
         elements.feedback.textContent =
             `Não foi possível executar o comando: ${error.message}`;
 
-        addLog("warning", `Falha no comando: ${error.message}`);
+        addLog(
+            "warning",
+            `Falha no comando: ${error.message}`
+        );
     }
 }
 
@@ -454,108 +627,227 @@ function updateClock() {
     const now = new Date();
 
     $("current-time").textContent =
-        now.toLocaleTimeString("pt-BR", { hour12: false });
+        now.toLocaleTimeString(
+            "pt-BR",
+            { hour12: false }
+        );
 
     $("current-date").textContent =
-        now.toLocaleDateString("pt-BR", {
-            weekday: "short",
-            day: "2-digit",
-            month: "short",
-            year: "numeric"
-        });
+        now.toLocaleDateString(
+            "pt-BR",
+            {
+                weekday: "short",
+                day: "2-digit",
+                month: "short",
+                year: "numeric"
+            }
+        );
 }
 
-// Inicialização
+// ====== INICIALIZAÇÃO ======
+
 function initializeDashboard() {
     if (!checkElements()) {
-        console.error("RoomSense: inicialização interrompida.");
+        console.error(
+            "RoomSense: inicialização interrompida."
+        );
+
         return;
     }
 
-    $("footer-year").textContent = new Date().getFullYear();
+    $("footer-year").textContent =
+        new Date().getFullYear();
 
-    // Os eventos são contabilizados pelos sensores físicos.
-    $("simulate-entry").disabled = true;
-    $("simulate-exit").disabled = true;
+    // Botões de entrada e saída habilitados
+    elements.simulateEntry.disabled = false;
+    elements.simulateExit.disabled = false;
 
-    $("simulate-entry").title =
-        "A entrada é detectada pelo sensor físico.";
+    elements.simulateEntry.title =
+        "Registrar manualmente uma entrada pelo dashboard.";
 
-    $("simulate-exit").title =
-        "A saída é detectada pelo sensor físico.";
+    elements.simulateExit.title =
+        "Registrar manualmente uma saída pelo dashboard.";
 
     elements.feedback.textContent =
-        "Aguardando eventos dos sensores físicos do ESP32.";
+        "Aguardando conexão com o ESP32.";
 
-    $("reset-demo").textContent = "↺ Zerar contador físico";
+    $("reset-demo").textContent =
+        "↺ Zerar contador físico";
 
-    $("reset-demo").addEventListener("click", () => {
-        command(
-            () => api("/api/reset", { method: "POST" }),
-            "Contador do ESP32 reiniciado."
-        );
-    });
+    // ====== BOTÃO DE ENTRADA ======
+    elements.simulateEntry.addEventListener(
+        "click",
+        () => {
+            command(
+                () => api(
+                    "/api/entry",
+                    { method: "POST" }
+                ),
 
-    $("clear-logs").addEventListener("click", () => {
-        command(
-            () => api("/api/logs/clear", { method: "POST" }),
-            "Histórico de logs limpo no ESP32."
-        );
-    });
+                "Entrada registrada pelo dashboard."
+            );
+        }
+    );
 
-    elements.redToggle.addEventListener("click", () => {
-        if (state.actuatorMode !== "manual") return;
+    // ====== BOTÃO DE SAÍDA ======
+    elements.simulateExit.addEventListener(
+        "click",
+        () => {
+            command(
+                () => api(
+                    "/api/exit",
+                    { method: "POST" }
+                ),
 
-        command(
-            () => postForm("/api/led", {
-                color: "red",
-                on: state.ledRed ? "0" : "1"
-            }),
-            "Comando enviado ao LED vermelho."
-        );
-    });
+                "Saída registrada pelo dashboard."
+            );
+        }
+    );
 
-    elements.greenToggle.addEventListener("click", () => {
-        if (state.actuatorMode !== "manual") return;
+    // ====== RESET DO CONTADOR ======
+    $("reset-demo").addEventListener(
+        "click",
+        () => {
+            command(
+                () => api(
+                    "/api/reset",
+                    { method: "POST" }
+                ),
 
-        command(
-            () => postForm("/api/led", {
-                color: "green",
-                on: state.ledGreen ? "0" : "1"
-            }),
-            "Comando enviado ao LED verde."
-        );
-    });
+                "Contador do ESP32 reiniciado."
+            );
+        }
+    );
 
-    $("auto-mode").addEventListener("click", () => {
-        command(
-            () => postForm("/api/mode", { mode: "auto" }),
-            "Modo automático ativado no ESP32."
-        );
-    });
+    // ====== LIMPAR LOGS ======
+    $("clear-logs").addEventListener(
+        "click",
+        () => {
+            command(
+                () => api(
+                    "/api/logs/clear",
+                    { method: "POST" }
+                ),
 
-    $("manual-mode").addEventListener("click", () => {
-        command(
-            () => postForm("/api/mode", { mode: "manual" }),
-            "Modo manual ativado no ESP32."
-        );
-    });
+                "Histórico de logs limpo no ESP32."
+            );
+        }
+    );
 
-    document.querySelectorAll(".nav-item").forEach(item => {
-        item.addEventListener("click", () => {
-            document.querySelectorAll(".nav-item").forEach(nav => {
-                nav.classList.remove("active");
-            });
+    // ====== LED VERMELHO ======
+    elements.redToggle.addEventListener(
+        "click",
+        () => {
+            if (
+                state.actuatorMode !== "manual"
+            ) {
+                return;
+            }
 
-            item.classList.add("active");
+            command(
+                () => postForm(
+                    "/api/led",
+                    {
+                        color: "red",
+
+                        on: state.ledRed
+                            ? "0"
+                            : "1"
+                    }
+                ),
+
+                "Comando enviado ao LED vermelho."
+            );
+        }
+    );
+
+    // ====== LED VERDE ======
+    elements.greenToggle.addEventListener(
+        "click",
+        () => {
+            if (
+                state.actuatorMode !== "manual"
+            ) {
+                return;
+            }
+
+            command(
+                () => postForm(
+                    "/api/led",
+                    {
+                        color: "green",
+
+                        on: state.ledGreen
+                            ? "0"
+                            : "1"
+                    }
+                ),
+
+                "Comando enviado ao LED verde."
+            );
+        }
+    );
+
+    // ====== MODO AUTOMÁTICO ======
+    $("auto-mode").addEventListener(
+        "click",
+        () => {
+            command(
+                () => postForm(
+                    "/api/mode",
+                    { mode: "auto" }
+                ),
+
+                "Modo automático ativado no ESP32."
+            );
+        }
+    );
+
+    // ====== MODO MANUAL ======
+    $("manual-mode").addEventListener(
+        "click",
+        () => {
+            command(
+                () => postForm(
+                    "/api/mode",
+                    { mode: "manual" }
+                ),
+
+                "Modo manual ativado no ESP32."
+            );
+        }
+    );
+
+    // ====== NAVEGAÇÃO ======
+    document
+        .querySelectorAll(".nav-item")
+        .forEach(item => {
+            item.addEventListener(
+                "click",
+                () => {
+                    document
+                        .querySelectorAll(".nav-item")
+                        .forEach(nav => {
+                            nav.classList.remove("active");
+                        });
+
+                    item.classList.add("active");
+                }
+            );
         });
-    });
 
+    // ====== INICIALIZAÇÃO FINAL ======
     updateClock();
-    window.setInterval(updateClock, 1000);
+
+    window.setInterval(
+        updateClock,
+        1000
+    );
 
     renderLogs();
+
     updateMovement("parado");
+
     renderActuators();
 
     addLog(
@@ -564,7 +856,14 @@ function initializeDashboard() {
     );
 
     pollESP32();
-    window.setInterval(pollESP32, POLL_INTERVAL);
+
+    window.setInterval(
+        pollESP32,
+        POLL_INTERVAL
+    );
 }
 
-document.addEventListener("DOMContentLoaded", initializeDashboard);
+document.addEventListener(
+    "DOMContentLoaded",
+    initializeDashboard
+);
